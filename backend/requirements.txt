@@ -1,5 +1,6 @@
 fastapi[standard]
 uvicorn[standard]
+plaid-python
 sqlmodel
 pydantic
 pydantic-settings
