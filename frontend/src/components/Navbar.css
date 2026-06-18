@@ -1,0 +1,14 @@
+.Navbar {
+  background-color: grey;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.navbar-links>li {
+  list-style-type: none;
+}
+
+.navbar-links>li>a {
+  color: black;
+}

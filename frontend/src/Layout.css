@@ -4,3 +4,10 @@
   flex-direction: column;
   gap: 0;
 }
+
+.Layout>header {
+  display: flex;
+  padding: 0;
+  margin: 0;
+  height: fit-content;
+}
