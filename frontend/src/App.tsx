@@ -1,28 +1,17 @@
-import { useEffect, useState } from 'react';
+import { Routes, Route, BrowserRouter } from "react-router";
 import './App.css';
-import axios from 'axios';
+import { HomePage } from './pages/HomePage';
+import { Layout } from './Layout';
 
 function App() {
-  const [serverMessage, setServerMessage] = useState<String>("");
-
-  useEffect(() => {
-    axios.get<String>("http://localhost:8000")
-      .then(
-        (res) =>
-          setServerMessage(res.data)
-      )
-
-  })
-
   return (
-    <div className="App">
-      <header className="App-header">
-        Bank transaction tracker
-      </header>
-
-      {serverMessage}
-
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
