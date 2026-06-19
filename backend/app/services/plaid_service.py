@@ -43,3 +43,35 @@ def create_link_token(client: plaid_api.PlaidApi):
     response = client.link_token_create(request)
 
     return response
+
+
+def create_sandbox_public_token(
+    client: plaid_api.PlaidApi,
+) -> str:
+
+    # Get first institution from plaid
+    inst_request = plaid_api.InstitutionsGetRequest(
+        country_codes=[CountryCode("GB")], count=1, offset=0
+    )
+
+    inst_response = client.institutions_get(inst_request)
+
+    request = plaid_api.SandboxPublicTokenCreateRequest(
+        institution_id=inst_response.institutions[0].institution_id,
+        initial_products=[Products("transactions")],
+    )
+
+    response = client.sandbox_public_token_create(request)
+
+    return response.public_token
+
+
+def exchange_public_for_access_token(
+    client: plaid_api.PlaidApi, public_token: str
+) -> str:
+    request = plaid_api.ItemPublicTokenExchangeRequest(
+        public_token=public_token)
+
+    exchange_response = client.item_public_token_exchange(request)
+
+    return exchange_response.access_token
