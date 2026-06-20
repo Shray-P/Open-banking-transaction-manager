@@ -1,3 +1,4 @@
+from datetime import datetime, date
 import time
 
 import plaid
@@ -8,6 +9,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 
 
 from app.config import get_settings
+from app.models.transactions import Transaction
 
 
 def get_plaid_client() -> plaid_api.PlaidApi:
@@ -75,3 +77,36 @@ def exchange_public_for_access_token(
     exchange_response = client.item_public_token_exchange(request)
 
     return exchange_response.access_token
+
+
+def get_transactions(
+    client: plaid_api.PlaidApi, access_token: str
+) -> list[Transaction]:
+    cursor = ""
+
+    added = []
+    modified = []
+    removed = []
+    has_more = True
+
+    while has_more:
+        request = plaid_api.TransactionsSyncRequest(
+            access_token=access_token,
+            cursor=cursor,
+        )
+        response = client.transactions_sync(request)
+        cursor = response.next_cursor
+
+        if cursor == "":
+            time.sleep(2)
+            continue
+
+        added.extend(response.added)
+        modified.extend(response.modified)
+        removed.extend(response.removed)
+        has_more = response.has_more
+
+    transactions = [Transaction.from_plaid(
+        transaction) for transaction in added]
+
+    return transactions
