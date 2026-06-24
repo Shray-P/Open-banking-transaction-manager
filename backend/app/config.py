@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     plaid_client_id: Optional[str] = None
     plaid_secret: Optional[str] = None
     plaid_env: Optional[Literal["sandbox", "development", "production"]] = None
+    dev_database_url: Optional[str] = None
+    test_database_url: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -2,6 +2,7 @@ fastapi[standard]
 uvicorn[standard]
 plaid-python
 sqlmodel
+psycopg2-binary
 pydantic
 pydantic-settings
 pytest

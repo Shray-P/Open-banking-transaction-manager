@@ -1,4 +1,3 @@
-from datetime import datetime, date
 import time
 
 import plaid

@@ -8,10 +8,10 @@ services:
     environment:
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
     ports:
       - "5432:5432"
     volumes:
+      - ./init-db:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
 
   web:
