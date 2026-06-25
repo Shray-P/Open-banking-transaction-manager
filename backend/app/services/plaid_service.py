@@ -9,6 +9,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 
 from app.config import get_settings
 from app.models.transactions import Transaction
+from app.models.item import Item
 
 
 def get_plaid_client() -> plaid_api.PlaidApi:
@@ -67,15 +68,24 @@ def create_sandbox_public_token(
     return response.public_token
 
 
-def exchange_public_for_access_token(
-    client: plaid_api.PlaidApi, public_token: str
-) -> str:
+def get_item(client: plaid_api.PlaidApi, public_token: str) -> Item:
     request = plaid_api.ItemPublicTokenExchangeRequest(
         public_token=public_token)
 
     exchange_response = client.item_public_token_exchange(request)
 
-    return exchange_response.access_token
+    access_token = exchange_response.access_token
+    item_id = exchange_response.item_id
+
+    request = plaid_api.ItemGetRequest(access_token=access_token)
+
+    item_response = client.item_get(request)
+
+    return Item(
+        id=item_id,
+        institution_name=item_response.institution_name,
+        access_token=access_token,
+    )
 
 
 def get_transactions(

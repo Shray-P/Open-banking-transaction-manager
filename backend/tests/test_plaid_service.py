@@ -3,7 +3,7 @@ from datetime import datetime, date
 from app.services.plaid_service import (
     create_link_token,
     create_sandbox_public_token,
-    exchange_public_for_access_token,
+    get_item,
     get_plaid_client,
     get_transactions,
 )
@@ -19,7 +19,7 @@ def test_create_link_token():
     assert token.request_id is not None
 
 
-def test_exchange_public_for_access_token():
+def test_get_item():
     client = get_plaid_client()
     pub_token = create_sandbox_public_token(client)
 
@@ -27,22 +27,22 @@ def test_exchange_public_for_access_token():
     assert isinstance(pub_token, str)
     assert len(pub_token) > 0
 
-    acc_token = exchange_public_for_access_token(client, pub_token)
+    item = get_item(client, pub_token)
 
-    assert acc_token is not None
-    assert isinstance(acc_token, str)
-    assert len(acc_token) > 0
+    assert item.id
+    assert item.institution_name
+    assert item.access_token
 
 
 def test_get_transactions():
     client = get_plaid_client()
     pub_token = create_sandbox_public_token(client)
-    acc_token = exchange_public_for_access_token(client, pub_token)
+    acc_token = get_item(client, pub_token).access_token
 
     transactions = get_transactions(client, acc_token)
 
     for t in transactions:
-        assert t.transaction_id
+        assert t.id
         assert t.account_id
         assert t.name
         assert t.iso_currency_code
