@@ -34,7 +34,7 @@ def get_plaid_client() -> plaid_api.PlaidApi:
     return client
 
 
-def create_link_token(client: plaid_api.PlaidApi):
+def create_plaid_link_token(client: plaid_api.PlaidApi):
     request = plaid_api.LinkTokenCreateRequest(
         products=[Products("transactions")],
         client_name="Plaid Web App",
@@ -44,7 +44,7 @@ def create_link_token(client: plaid_api.PlaidApi):
     )
     response = client.link_token_create(request)
 
-    return response
+    return response.link_token
 
 
 def create_sandbox_public_token(
@@ -68,7 +68,7 @@ def create_sandbox_public_token(
     return response.public_token
 
 
-def get_item(client: plaid_api.PlaidApi, public_token: str) -> Item:
+def get_plaid_item(client: plaid_api.PlaidApi, public_token: str) -> Item:
     request = plaid_api.ItemPublicTokenExchangeRequest(
         public_token=public_token)
 
@@ -83,12 +83,12 @@ def get_item(client: plaid_api.PlaidApi, public_token: str) -> Item:
 
     return Item(
         id=item_id,
-        institution_name=item_response.institution_name,
+        institution_name=item_response.item.institution_name,
         access_token=access_token,
     )
 
 
-def get_transactions(
+def get_plaid_transactions(
     client: plaid_api.PlaidApi, access_token: str
 ) -> list[Transaction]:
     cursor = ""
