@@ -8,6 +8,7 @@ from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUse
 
 
 from app.config import get_settings
+from app.models.accounts import Account
 from app.models.transactions import Transaction
 from app.models.item import Item
 
@@ -119,3 +120,17 @@ def get_plaid_transactions(
         transaction) for transaction in added]
 
     return transactions
+
+
+def get_plaid_accounts_from_item(
+    client: plaid_api.PlaidApi, item: Item
+) -> list[Account]:
+    request = plaid_api.AccountsGetRequest(access_token=item.access_token)
+    response = client.accounts_get(request)
+
+    accounts = [
+        Account(id=account.account_id, name=account.name)
+        for account in response.accounts
+    ]
+
+    return accounts
