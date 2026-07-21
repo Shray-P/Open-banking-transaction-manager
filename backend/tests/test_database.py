@@ -1,3 +1,4 @@
+import uuid
 import pytest
 
 from sqlmodel import Session, SQLModel, create_engine, delete
@@ -6,13 +7,16 @@ from app.config import get_settings
 from app.database.database import (
     add_account,
     add_item,
+    add_user,
     delete_item,
     get_account,
     get_accounts_from_item,
     get_item,
+    get_user,
 )
 from app.database.models import Item as ItemDB
 
+from app.models.users import User
 from app.models.accounts import Account
 from app.models.item import Item
 
@@ -116,3 +120,15 @@ def test_get_accounts_from_item(session):
 
     for account in accounts:
         assert account
+
+
+def test_insert_user(session):
+    id = uuid.uuid4()
+
+    add_user(session, User(id=id, name="1"))
+
+    user = get_user(session, id)
+
+    assert user
+    assert user.id
+    assert user.name

@@ -1,6 +1,9 @@
+import uuid
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database.database import add_user, get_session
+from app.models.users import UserCreateRequest, UserCreateResponse, User
 from app.models.item import ItemCreateRequest, ItemCreateResponse
 from app.services.plaid_service import (
     create_plaid_link_token,
@@ -39,3 +42,12 @@ def create_item(request: ItemCreateRequest, client=Depends(get_plaid_client)):
     item = get_plaid_item(client, request.public_token)
 
     return ItemCreateResponse(id=item.id, institution_name=item.institution_name)
+
+
+@app.post("/user/create", response_model=UserCreateResponse)
+def create_user(request: UserCreateRequest, session=Depends(get_session)):
+    user = User(id=uuid.uuid4(), name=request.name)
+
+    add_user(session, user)
+
+    return UserCreateResponse(user=user)

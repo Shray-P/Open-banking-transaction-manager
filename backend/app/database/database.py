@@ -1,12 +1,14 @@
 from os import name
+import uuid
 from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.config import get_settings
 
-from app.database.models import Account as AccountDB, Item as ItemDB
+from app.database.models import Account as AccountDB, Item as ItemDB, User as UserDB
 
 from app.models.item import Item
 from app.models.accounts import Account
+from app.models.users import User
 
 database_url = get_settings().dev_database_url
 
@@ -74,3 +76,16 @@ def get_accounts_from_item(session: Session, item: Item) -> list[Account]:
         select(AccountDB).where(AccountDB.item_id == item.id))
 
     return [Account(id=account.id, name=account.name) for account in accounts]
+
+
+def add_user(session: Session, user: User):
+    session.add(UserDB(id=user.id, name=user.name))
+
+
+def get_user(session: Session, id: uuid.UUID) -> User | None:
+    user = session.get(UserDB, id)
+
+    if user is None:
+        return None
+
+    return User(id=user.id, name=user.name)
