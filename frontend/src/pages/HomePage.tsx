@@ -1,33 +1,38 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import { usePlaidLink } from 'react-plaid-link';
+import { createItem, createUser, getRoot, requestLinkToken } from "../serverConnect/api"
+import { User } from '../serverConnect/schemas';
 
 export function HomePage() {
   const [serverMessage, setServerMessage] = useState<string>("");
   const [publicToken, setPublicToken] = useState<string | null>(null);
   const [institutions, setInstitutions] = useState<Array<string>>([]);
 
+  const [userName, setUserName] = useState("");
+
+  const [user, setUser] = useState<User>();
+
   const { open, ready } = usePlaidLink({
     token: publicToken,
     onSuccess: (publicToken, metadata) => {
-      axios.post<{ id: string, institution_name: string }>(`http://localhost:8000/api/items/create`, { public_token: publicToken }).then(
+      createItem({ public_token: publicToken }).then(
         (res) => {
-          setInstitutions([...institutions, res.data.institution_name])
+          setInstitutions([...institutions, res.institution_name])
         }
       )
     },
   });
 
   useEffect(() => {
-    axios.get<string>("http://localhost:8000/api")
+    getRoot()
       .then(
         (res) =>
-          setServerMessage(res.data)
+          setServerMessage(res)
       )
 
-    axios.get<string>("http://localhost:8000/api/link/request-token").then(
+    requestLinkToken().then(
       res => {
-        setPublicToken(res.data)
+        setPublicToken(res)
       }
     )
   }, [])
@@ -39,6 +44,24 @@ export function HomePage() {
     </h1>
 
     {serverMessage}
+
+    <div>
+      <div>{user?.id}</div>
+      <div>{user?.name}</div>
+    </div>
+
+    <div>
+
+      <input onChange={(e) => setUserName(e.target.value)} />
+
+      <button onClick={() => {
+        createUser(
+          {
+            name: userName
+          }
+        ).then(res => setUser(res.user))
+      }}>sign up</button>
+    </div>
 
     <button onClick={() => open()} disabled={!ready}>
       Connect a bank account

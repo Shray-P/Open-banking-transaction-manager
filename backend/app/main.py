@@ -40,7 +40,6 @@ def request_link_token(client=Depends(get_plaid_client)):
 @app.post("/items/create", response_model=ItemCreateResponse)
 def create_item(request: ItemCreateRequest, client=Depends(get_plaid_client)):
     item = get_plaid_item(client, request.public_token)
-
     return ItemCreateResponse(id=item.id, institution_name=item.institution_name)
 
 
