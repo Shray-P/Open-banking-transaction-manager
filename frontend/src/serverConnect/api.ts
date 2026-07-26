@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ItemCreateRequest, ItemCreateResponse, UserCreateRequest, UserCreateResponse } from './schemas';
+import { ItemCreateRequest, ItemCreateResponse, User, UserCreateRequest, UserCreateResponse, UserLoginRequest, UserLoginResponse } from "./schemas";
 
 const SERVER_ADDR = "http://localhost:8000/api";
 
@@ -17,6 +17,10 @@ async function get<T, T2 = null>(
   try {
     const response = await client.get<T>(path, {
       params: params,
+      headers: {
+        Authorization: localStorage.getItem("access_token"),
+      },
+
     });
 
     return response.data;
@@ -47,6 +51,20 @@ export async function getRoot() {
   return get<string>("")
 }
 
+export async function getMe() {
+  return get<User>("/user/me")
+}
+
+export async function createUser(request: UserCreateRequest) {
+  return post<UserCreateRequest, UserCreateResponse>("/user/create", request)
+}
+
+export async function loginUser(request: UserLoginRequest) {
+  let response = await post<UserLoginRequest, UserLoginResponse>("/user/login", request)
+  localStorage.setItem("access_token", `${response.access_token.token_type} ${response.access_token.access_token}`)
+  return response.user
+}
+
 export async function requestLinkToken() {
   return get<string>("/link/request-token")
 }
@@ -55,6 +73,3 @@ export async function createItem(reuqest: ItemCreateRequest) {
   return post<ItemCreateRequest, ItemCreateResponse>("/items/create", reuqest)
 }
 
-export async function createUser(request: UserCreateRequest) {
-  return post<UserCreateRequest, UserCreateResponse>("/user/create", request)
-}

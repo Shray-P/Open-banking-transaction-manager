@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     plaid_env: Optional[Literal["sandbox", "development", "production"]] = None
     dev_database_url: Optional[str] = None
     test_database_url: Optional[str] = None
+    secret_key: Optional[str] = None
+    signing_algorithm: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env")
 

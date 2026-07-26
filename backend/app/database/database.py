@@ -1,4 +1,3 @@
-from os import name
 import uuid
 from sqlmodel import Session, SQLModel, create_engine, select
 
@@ -61,6 +60,7 @@ def delete_item(session: Session, id: str):
 
 def add_account(session: Session, account: Account, item: Item):
     session.add(AccountDB(id=account.id, name=account.name, item_id=item.id))
+    session.commit()
 
 
 def get_account(session: Session, id: str) -> Account | None:
@@ -78,8 +78,10 @@ def get_accounts_from_item(session: Session, item: Item) -> list[Account]:
     return [Account(id=account.id, name=account.name) for account in accounts]
 
 
-def add_user(session: Session, user: User):
-    session.add(UserDB(id=user.id, name=user.name))
+def add_user(session: Session, user: User, password_hash: str):
+    session.add(UserDB(id=user.id, name=user.name,
+                password_hash=password_hash))
+    session.commit()
 
 
 def get_user(session: Session, id: uuid.UUID) -> User | None:
@@ -89,3 +91,20 @@ def get_user(session: Session, id: uuid.UUID) -> User | None:
         return None
 
     return User(id=user.id, name=user.name)
+
+
+def get_user_by_name(session: Session, name: str):
+    user = session.exec(select(UserDB).where(UserDB.name == name)).one()
+    if user is None:
+        return None
+
+    return User(id=user.id, name=user.name)
+
+
+def get_user_password_hash(session: Session, id: uuid.UUID) -> str | None:
+    user = session.get(UserDB, id)
+
+    if user is None:
+        return None
+
+    return user.password_hash

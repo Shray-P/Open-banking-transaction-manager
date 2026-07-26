@@ -14,11 +14,12 @@ from app.database.database import (
     get_item,
     get_user,
 )
-from app.database.models import Item as ItemDB
+from app.database.models import Item as ItemDB, User as UserDB, Account as AccountDB
 
 from app.models.users import User
 from app.models.accounts import Account
 from app.models.item import Item
+from app.services.auth_service import create_password_hash
 
 
 @pytest.fixture(scope="session")
@@ -34,7 +35,9 @@ def engine():
 @pytest.fixture()
 def session(engine):
     with Session(engine) as session:
+        session.exec(delete(AccountDB))
         session.exec(delete(ItemDB))
+        session.exec(delete(UserDB))
         session.commit()
         yield session
 
@@ -124,8 +127,10 @@ def test_get_accounts_from_item(session):
 
 def test_insert_user(session):
     id = uuid.uuid4()
+    password = "1"
+    password_hash = create_password_hash(password)
 
-    add_user(session, User(id=id, name="1"))
+    add_user(session, User(id=id, name="1"), password_hash)
 
     user = get_user(session, id)
 
