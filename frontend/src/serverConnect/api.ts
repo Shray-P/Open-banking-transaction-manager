@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ItemCreateRequest, ItemCreateResponse, User, UserCreateRequest, UserCreateResponse, UserLoginRequest, UserLoginResponse } from "./schemas";
+import { AccessToken, ItemCreateRequest, ItemCreateResponse, LoginRequest, LoginResponse, User, UserCreateRequest, UserCreateResponse, UserLoginRequest, UserLoginResponse } from "./schemas";
 
 const SERVER_ADDR = "http://localhost:8000/api";
 
@@ -63,6 +63,18 @@ export async function loginUser(request: UserLoginRequest) {
   let response = await post<UserLoginRequest, UserLoginResponse>("/user/login", request)
   localStorage.setItem("access_token", `${response.access_token.token_type} ${response.access_token.access_token}`)
   return response.user
+}
+
+export async function loginUserWithGoogle() {
+  return get<any>("/auth/google")
+}
+
+export async function exchangeLoginCode(request: LoginRequest) {
+  let response = await post<LoginRequest, LoginResponse>("/auth/exchange-login-code", request)
+  if (response === null || response.token === null)
+    return
+
+  localStorage.setItem("access_token", `${response.token.token_type} ${response.token.access_token}`)
 }
 
 export async function requestLinkToken() {

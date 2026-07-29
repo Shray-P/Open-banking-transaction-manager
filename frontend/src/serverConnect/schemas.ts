@@ -3,6 +3,14 @@ export interface AccessToken {
   token_type: string
 }
 
+export interface LoginRequest {
+  code: string
+}
+
+export interface LoginResponse {
+  token: AccessToken
+}
+
 export interface User {
   id: string
   name: string

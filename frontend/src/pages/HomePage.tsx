@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { createItem, createUser, getRoot, loginUser, getMe, requestLinkToken } from "../serverConnect/api"
+import { Link } from 'react-router-dom';
+import { createItem, createUser, getRoot, loginUser, loginUserWithGoogle, getMe, requestLinkToken } from "../serverConnect/api"
 import { User } from '../serverConnect/schemas';
 
 export function HomePage() {
@@ -97,6 +98,8 @@ export function HomePage() {
           }
         ).then(res => setUser(res))
       }}>login</button>
+
+      <Link to={"http://localhost:8000/api/auth/google"}>login with google</Link>
     </div>
 
 

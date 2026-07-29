@@ -1,5 +1,6 @@
 import uuid
 import pytest
+import secrets
 
 from sqlmodel import Session, SQLModel, create_engine, delete
 
@@ -7,11 +8,14 @@ from app.config import get_settings
 from app.database.database import (
     add_account,
     add_item,
+    add_login_code,
     add_user,
     delete_item,
+    delete_login_code,
     get_account,
     get_accounts_from_item,
     get_item,
+    get_login_code,
     get_user,
 )
 from app.database.models import Item as ItemDB, User as UserDB, Account as AccountDB
@@ -137,3 +141,38 @@ def test_insert_user(session):
     assert user
     assert user.id
     assert user.name
+
+
+def test_insert_login_code(session):
+    code = secrets.token_urlsafe()
+
+    id = uuid.uuid4()
+    user = User(id=id, name="1")
+    add_user(session, user)
+
+    add_login_code(session, code, user, 1)
+
+    login_code = get_login_code(session, code)
+
+    assert login_code
+    assert login_code.code
+    assert login_code.user_id
+    assert login_code.expire
+
+
+def test_delete_login_code(session):
+    code = secrets.token_urlsafe()
+
+    id = uuid.uuid4()
+    user = User(id=id, name="1")
+    add_user(session, user)
+
+    add_login_code(session, code, user, 1)
+
+    login_code = get_login_code(session, code)
+    assert login_code
+
+    delete_login_code(session, code)
+
+    login_code = get_login_code(session, code)
+    assert login_code is None

@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     test_database_url: Optional[str] = None
     secret_key: Optional[str] = None
     signing_algorithm: Optional[str] = None
+    google_auth_client_id: Optional[str] = None
+    google_auth_client_secret: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env")
 

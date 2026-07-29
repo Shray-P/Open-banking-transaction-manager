@@ -8,3 +8,5 @@ pydantic-settings
 pytest
 pyjwt
 pwdlib[argon2]
+authlib
+itsdangerous

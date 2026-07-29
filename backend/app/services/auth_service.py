@@ -6,6 +6,7 @@ from pwdlib import PasswordHash
 import uuid
 
 from app.config import get_settings
+from app.models.login_code import LoginCode
 from app.models.users import User
 from app.database.database import get_user, get_user_by_name, get_user_password_hash
 from app.models.tokens import AccessToken
@@ -15,6 +16,7 @@ ALGORITHM = get_settings().signing_algorithm
 SECRET_KEY = get_settings().secret_key
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
 
 password_hash = PasswordHash.recommended()
 
@@ -33,7 +35,8 @@ def create_password_hash(password: str):
     return password_hash.hash(password)
 
 
-def create_access_token(user: User) -> AccessToken:
+def create_access_token(user: User):
+    assert SECRET_KEY
     expire_time = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
@@ -45,6 +48,7 @@ def create_access_token(user: User) -> AccessToken:
 
 def decode_access_token(token: str):
     assert ALGORITHM
+    assert SECRET_KEY
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
     accessTokenData = AccessTokenData(
@@ -74,3 +78,7 @@ def get_user_by_access_token(session: Session, token: str) -> User | None:
     tok_data = decode_access_token(token)
     user = get_user(session, uuid.UUID(tok_data.sub))
     return user
+
+
+def is_login_code_valid(login_code: LoginCode):
+    return login_code.expire <= datetime.now()
