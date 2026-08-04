@@ -109,7 +109,7 @@ def get_user(session: Session, id: uuid.UUID) -> User | None:
 
 
 def get_user_by_name(session: Session, name: str):
-    user = session.exec(select(UserDB).where(UserDB.name == name)).one()
+    user = session.exec(select(UserDB).where(UserDB.name == name)).first()
     if user is None:
         return None
 

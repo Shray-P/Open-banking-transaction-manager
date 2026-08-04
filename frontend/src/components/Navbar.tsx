@@ -3,10 +3,11 @@ import "./Navbar.css";
 
 const pageLinks: [string, string][] = [
   ["/", "Home"],
+  ["/login", "Login"]
 ];
 
 export function Navbar() {
-  return <nav className={"Navbar"}>
+  return <nav className={"navbar"}>
     <ul className="navbar-links">
       {pageLinks.map(([path, name]) => (
         <li key={path}>

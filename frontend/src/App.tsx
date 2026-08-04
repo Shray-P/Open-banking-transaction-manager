@@ -3,6 +3,7 @@ import './App.css';
 import { HomePage } from './pages/HomePage';
 import { Layout } from './Layout';
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
+import { LoginPage } from "./pages/LoginPage";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
         </Route>
       </Routes>
