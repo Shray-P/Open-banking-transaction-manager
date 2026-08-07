@@ -1,4 +1,3 @@
-from datetime import timedelta
 from typing import Annotated
 import uuid
 from fastapi import Depends, FastAPI, Request
@@ -6,8 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from authlib.integrations.starlette_client import OAuth
-from app.config import Settings, get_settings
+from app.config import get_settings
 from app.database.database import (
     add_login_code,
     add_user,
@@ -15,7 +13,7 @@ from app.database.database import (
     get_login_code,
     get_session,
     get_user,
-    get_user_by_google_id,
+    get_user_by_idp_id,
 )
 from app.models.login_code import LoginCodeRequest, LoginCodeResponse
 from app.models.tokens import AccessToken
@@ -27,6 +25,7 @@ from app.models.users import (
     UserLoginResponse,
 )
 from app.models.item import ItemCreateRequest, ItemCreateResponse
+from app.services.idp_service import IDENTITY_PROVIDERS
 from app.services.auth_service import (
     SECRET_KEY,
     authenticate_user,
@@ -41,6 +40,7 @@ from app.services.plaid_service import (
     get_plaid_item,
 )
 import secrets
+
 
 create_tables()
 
@@ -68,18 +68,6 @@ app.add_middleware(
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
-oauth = OAuth()
-oauth.register(
-    name="google",
-    client_id=get_settings().google_auth_client_id,
-    client_secret=get_settings().google_auth_client_secret,
-    authorize_url="https://accounts.google.com/o/oauth2/auth",
-    authorize_params={"scope": "openid email profile"},
-    access_token_url="https://oauth2.googleapis.com/token",
-    client_kwargs={"scope": "openid email profile"},
-    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-)
-
 
 @app.get("", response_model=str)
 def root():
@@ -102,27 +90,26 @@ async def get_access_token(
     return access_token
 
 
-@app.get("/auth/google")
-async def auth_google(request: Request):
-    return await oauth.google.authorize_redirect(
-        request,
-        redirect_uri="http://localhost:8000/api/auth/google/callback",
-        prompt="select_account",
+@app.get("/auth/{provider}", tags=["Auth"])
+async def auth_idp(provider: str, request: Request):
+    return await IDENTITY_PROVIDERS[provider].redirect(
+        request, request.url_for("auth_idp_callback", provider=provider)
     )
 
 
-@app.get("/auth/google/callback", tags=["Auth"])
-async def google_callback(request: Request, session=Depends(get_session)):
-    token = await oauth.google.authorize_access_token(request)
-    user_info = token["userinfo"] or {}
+@app.get("/auth/{provider}/callback", tags=["Auth"])
+async def auth_idp_callback(
+    provider: str, request: Request, session=Depends(get_session)
+):
+    user_info = await IDENTITY_PROVIDERS[provider].authenticate(request)
 
-    user = get_user_by_google_id(session, user_info["sub"])
+    user = get_user_by_idp_id(
+        session, user_info.provider, user_info.provider_id)
 
     if user is None:
-        user = User(id=uuid.uuid4(), name=user_info["email"])
-        add_user(session, user, google_id=user_info["sub"])
-
-    token = create_access_token(user)
+        user = User(id=uuid.uuid4(), name=user_info.email)
+        add_user(session, user, idp=user_info.provider,
+                 idp_id=user_info.provider_id)
 
     code = secrets.token_urlsafe()
 

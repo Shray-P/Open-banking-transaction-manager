@@ -20,7 +20,8 @@ class User(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str
     password_hash: str | None
-    google_id: str | None
+    idp: str | None
+    idp_id: str | None
 
 
 class LoginCode(SQLModel, table=True):

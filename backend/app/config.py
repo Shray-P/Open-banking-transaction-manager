@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     signing_algorithm: Optional[str] = None
     google_auth_client_id: Optional[str] = None
     google_auth_client_secret: Optional[str] = None
+    microsoft_auth_client_id: Optional[str] = None
+    microsoft_auth_client_secret: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env")
 

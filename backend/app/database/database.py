@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone, timedelta
-from sqlmodel import Session, SQLModel, create_engine, delete, select
+from sqlmodel import Session, SQLModel, create_engine, select
 
 from app.config import get_settings
 
@@ -79,8 +79,7 @@ def get_account(session: Session, id: str) -> Account | None:
 
 
 def get_accounts_from_item(session: Session, item: Item) -> list[Account]:
-    accounts = session.exec(
-        select(AccountDB).where(AccountDB.item_id == item.id))
+    accounts = session.exec(select(AccountDB).where(AccountDB.item_id == item.id))
 
     return [Account(id=account.id, name=account.name) for account in accounts]
 
@@ -89,11 +88,16 @@ def add_user(
     session: Session,
     user: User,
     password_hash: str | None = None,
-    google_id: str | None = None,
+    idp: str | None = None,
+    idp_id: str | None = None,
 ):
     session.add(
         UserDB(
-            id=user.id, name=user.name, password_hash=password_hash, google_id=google_id
+            id=user.id,
+            name=user.name,
+            password_hash=password_hash,
+            idp=idp,
+            idp_id=idp_id,
         )
     )
     session.commit()
@@ -125,8 +129,10 @@ def get_user_password_hash(session: Session, id: uuid.UUID) -> str | None:
     return user.password_hash
 
 
-def get_user_by_google_id(session: Session, id: str):
-    user = session.exec(select(UserDB).where(UserDB.google_id == id)).first()
+def get_user_by_idp_id(session: Session, idp: str, id: str):
+    user = session.exec(
+        select(UserDB).where(UserDB.idp == idp and UserDB.idp_id == id)
+    ).first()
     if user is None:
         return None
 

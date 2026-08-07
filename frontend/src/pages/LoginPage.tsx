@@ -5,7 +5,7 @@ import { createUser, loginUser } from "../serverConnect/api";
 import "./LoginPage.css"
 
 export function LoginPage() {
-  const alt_auth_methods = ["google"]
+  const alt_auth_methods = ["google", "microsoft"]
 
   const [createAccount, setCreateAccount] = useState(false)
   const [success, setSuccess] = useState<boolean>(false)

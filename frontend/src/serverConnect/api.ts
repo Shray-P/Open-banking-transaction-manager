@@ -65,10 +65,6 @@ export async function loginUser(request: UserLoginRequest) {
   return response.user
 }
 
-export async function loginUserWithGoogle() {
-  return get<any>("/auth/google")
-}
-
 export async function exchangeLoginCode(request: LoginRequest) {
   let response = await post<LoginRequest, LoginResponse>("/auth/exchange-login-code", request)
   if (response === null || response.token === null)

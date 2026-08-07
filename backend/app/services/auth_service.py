@@ -11,7 +11,6 @@ from app.models.users import User
 from app.database.database import get_user, get_user_by_name, get_user_password_hash
 from app.models.tokens import AccessToken
 
-
 ALGORITHM = get_settings().signing_algorithm
 SECRET_KEY = get_settings().secret_key
 
